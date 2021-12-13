@@ -6,21 +6,29 @@
 //
 
 import UIKit
+import CoreData
 
 class BucketListViewController: UITableViewController , AddItemTableViewControllerDelegate {
    
     
-   
+    let managedObjectContext = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
-    var items = ["Go to the moon" , "Go to the Gym" , "feed the pets"]
+    var items = [MyListItems]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
         
-        //navigationItem.
+        fetchAllItems()
     }
     
     
+    
+    @IBAction func addButton(_ sender: UIBarButtonItem) {
+        
+        performSegue(withIdentifier: "EditItemSeque", sender: sender)
+    }
+    
+   
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 
         return items.count
@@ -29,11 +37,22 @@ class BucketListViewController: UITableViewController , AddItemTableViewControll
       
         let cell = tableView.dequeueReusableCell(withIdentifier: "MyCell", for: indexPath)
         
-        cell.textLabel?.text = items[indexPath.row]
+        cell.textLabel?.text = items[indexPath.row].name
         
         return cell
     }
     
+    func fetchAllItems(){
+        
+        let itemRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "MyListItems")
+        do {
+            let results = try managedObjectContext.fetch(itemRequest)
+            items = results as! [MyListItems]
+        } catch {
+            print("\(error)")
+        }
+        tableView.reloadData()
+    }
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
        // performSegue(withIdentifier: "EditItemSeque", sender: indexPath)
@@ -44,24 +63,36 @@ class BucketListViewController: UITableViewController , AddItemTableViewControll
     }
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        let item = items[indexPath.row]
+        managedObjectContext.delete(item)
+        
+        do {
+            try managedObjectContext.save()
+           
+        }catch{
+            print(error.localizedDescription)
+        }
         items.remove(at: indexPath.row)
         tableView.reloadData()
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+      
         
-        if segue.identifier == "AddItemSeque" {
+        if sender is UIBarButtonItem {
+            
             let navigationController = segue.destination as! UINavigationController
             let addItemTableController = navigationController.topViewController as! AddItemTableViewController
             addItemTableController.delegate = self
-        } else if segue.identifier == "EditItemSeque" {
+            
+        } else if sender is IndexPath  {
            
             let navigationController = segue.destination as! UINavigationController
             let addItemTableController = navigationController.topViewController as! AddItemTableViewController
             addItemTableController.delegate = self
             
             let indexPath = sender as! NSIndexPath
-            let item = items[indexPath.row]
+            let item = items[indexPath.row].name
             addItemTableController.itemEdit = item
             addItemTableController.indexPath = indexPath
             
@@ -75,15 +106,30 @@ class BucketListViewController: UITableViewController , AddItemTableViewControll
     }
     
     func itemSaved(by controller: AddItemTableViewController, with text: String, at indexPath: NSIndexPath?) {
-        
+    
+
         if let editIndexPath = indexPath {
             
-            items[editIndexPath.row] = text
+           let item = items[editIndexPath.row]
+           item.name = text
             
         } else {
-            items.append(text)
+            
+            let thing = NSEntityDescription.insertNewObject(forEntityName: "MyListItems", into: managedObjectContext) as! MyListItems
+            thing.name = text
+            items.append(thing)
+            
         }
         
+        if managedObjectContext.hasChanges{
+            do {
+                try managedObjectContext.save()
+               
+            }catch{
+                print(error.localizedDescription)
+            }
+        }
+    
         tableView.reloadData()
         dismiss(animated: true, completion: nil)
     }

@@ -33,7 +33,7 @@
                     <navigationItem key="navigationItem" id="c6f-y3-sU6">
                         <barButtonItem key="rightBarButtonItem" title="Add" image="plus" catalog="system" id="mYH-7A-62U">
                             <connections>
-                                <segue destination="bU2-U9-H4A" kind="presentation" identifier="AddItemSeque" id="Unb-0q-67O"/>
+                                <action selector="addButton:" destination="lsV-sG-jGe" id="BEi-Ht-hUC"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -142,9 +142,6 @@
             <point key="canvasLocation" x="1821.7391304347827" y="71.651785714285708"/>
         </scene>
     </scenes>
-    <inferredMetricsTieBreakers>
-        <segue reference="JIl-rR-YeC"/>
-    </inferredMetricsTieBreakers>
     <resources>
         <image name="plus" catalog="system" width="128" height="113"/>
         <systemColor name="systemBackgroundColor">
