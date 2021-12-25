@@ -16,6 +16,7 @@ class AddItemTableViewController: UITableViewController {
     var indexPath: NSIndexPath?
     
     @IBOutlet weak var itemTextField: UITextField!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
